@@ -38,14 +38,13 @@ class PolygonsController < ApplicationController
   # POST /polygons
   def create
     begin
-      @polygon = Polygon.create_from_geojson(params[:geojson])
-    rescue
+      @polygon = Polygon.create_from_geojson!(params[:geometry])
+    rescue Exception => e
       msg = "Polygon couldn't be uploaded: #{e.message}"
       Rails.logger.fatal "#{msg} (#{e.class})"
       render :json => {:error => msg}
     else
-      @polygon.analyse(params[:data], params[:sources])
-      render :json => @polygon.as_json
+      render :json => {:id => @polygon.id}
     end
   end
 

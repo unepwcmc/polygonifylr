@@ -192,10 +192,10 @@ function submitPolygon() {
     }
   }
 
-  var dataObj = {"geojson": geojson, "sources": sources};
+  var dataObj = {"geometry": geojson};
   $.ajax({
     type: 'POST',
-    url: "polygon/create",
+    url: "polygons",
     data: dataObj,
     cache: false,
     dataType: 'json',
