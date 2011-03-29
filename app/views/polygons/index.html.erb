@@ -5,15 +5,12 @@
     <th>Geometry</th>
     <th></th>
     <th></th>
-    <th></th>
   </tr>
 
 <% @polygons.each do |polygon| %>
   <tr>
-    <td><%= polygon.geometry %></td>
-    <td><%= link_to 'Show', polygon %></td>
-    <td><%= link_to 'Edit', edit_polygon_path(polygon) %></td>
-    <td><%= link_to 'Destroy', polygon, :confirm => 'Are you sure?', :method => :delete %></td>
+    <td><%= link_to 'Edit', edit_polygon_path(polygon) %> #<%= polygon.id %></td>
+    <!--<td><%= link_to 'Destroy', polygon, :confirm => 'Are you sure?', :method => :delete %></td>-->
   </tr>
 <% end %>
 </table>
