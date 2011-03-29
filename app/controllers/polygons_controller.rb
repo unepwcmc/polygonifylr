@@ -25,11 +25,9 @@ class PolygonsController < ApplicationController
   # GET /polygons/new.xml
   def new
     @polygon = Polygon.new
+    @mx_area_km2 = 10
 
-    respond_to do |format|
-      format.html # new.html.erb
-      format.xml  { render :xml => @polygon }
-    end
+    render :action => :new, :layout => "map"
   end
 
   # GET /polygons/1/edit
@@ -38,18 +36,16 @@ class PolygonsController < ApplicationController
   end
 
   # POST /polygons
-  # POST /polygons.xml
   def create
-    @polygon = Polygon.new(params[:polygon])
-
-    respond_to do |format|
-      if @polygon.save
-        format.html { redirect_to(@polygon, :notice => 'Polygon was successfully created.') }
-        format.xml  { render :xml => @polygon, :status => :created, :location => @polygon }
-      else
-        format.html { render :action => "new" }
-        format.xml  { render :xml => @polygon.errors, :status => :unprocessable_entity }
-      end
+    begin
+      @polygon = Polygon.create_from_geojson(params[:geojson])
+    rescue
+      msg = "Polygon couldn't be uploaded: #{e.message}"
+      Rails.logger.fatal "#{msg} (#{e.class})"
+      render :json => {:error => msg}
+    else
+      @polygon.analyse(params[:data], params[:sources])
+      render :json => @polygon.as_json
     end
   end
 
