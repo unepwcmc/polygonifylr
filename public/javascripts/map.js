@@ -87,7 +87,6 @@ function initialize(data) {
 
   loadOverlays();
 
-
   $.each(data, function(i, val) {
     var latLong = new google.maps.LatLng(val.y, val.x);
     bounds.extend(latLong); // Center point.
@@ -102,6 +101,12 @@ function initialize(data) {
 
   map.fitBounds(bounds);
   map.setCenter(bounds.getCenter());
+
+  if( bounds.isEmpty() && navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position){
+      map.setCenter(new google.maps.LatLng(position.coords.latitude, position.coords.longitude));
+    });
+  }
 }
 
 /*drawing polygon*/
