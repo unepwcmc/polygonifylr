@@ -177,12 +177,6 @@ function startPolygon() {
 
 function submitPolygon() {
   $('#done').addClass('loading');
-  var geojson = polys2geoJson([poly]);
-  var sources = [];
-  $('#layers input:checkbox:checked').each(function() {
-    sources.push($(this).val());
-  });
-
   if (MAX_POLYGON_AREA_KM2 > 0) {
     var area = google.maps.geometry.spherical.computeArea(poly.getPath());
     if (area > MAX_POLYGON_AREA_KM2 * 1000 * 1000) {
@@ -192,6 +186,7 @@ function submitPolygon() {
     }
   }
 
+  var geojson = polys2geoJson([poly]);
   var dataObj = {"geometry": geojson};
   $.ajax({
     type: 'POST',

@@ -1,38 +1,19 @@
 class PolygonsController < ApplicationController
   # GET /polygons
-  # GET /polygons.xml
   def index
     @polygons = Polygon.all
-
-    respond_to do |format|
-      format.html # index.html.erb
-      format.xml  { render :xml => @polygons }
-    end
-  end
-
-  # GET /polygons/1
-  # GET /polygons/1.xml
-  def show
-    @polygon = Polygon.find(params[:id])
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.xml  { render :xml => @polygon }
-    end
   end
 
   # GET /polygons/new
-  # GET /polygons/new.xml
   def new
     @polygon = Polygon.new
-    @mx_area_km2 = 10
-
     render :action => :new, :layout => "map"
   end
 
   # GET /polygons/1/edit
   def edit
     @polygon = Polygon.find(params[:id])
+    render :action => :edit, :layout => "map"
   end
 
   # POST /polygons
@@ -49,30 +30,21 @@ class PolygonsController < ApplicationController
   end
 
   # PUT /polygons/1
-  # PUT /polygons/1.xml
   def update
     @polygon = Polygon.find(params[:id])
 
-    respond_to do |format|
-      if @polygon.update_attributes(params[:polygon])
-        format.html { redirect_to(@polygon, :notice => 'Polygon was successfully updated.') }
-        format.xml  { head :ok }
-      else
-        format.html { render :action => "edit" }
-        format.xml  { render :xml => @polygon.errors, :status => :unprocessable_entity }
-      end
+    if @polygon.update_attributes(params[:polygon])
+      redirect_to(@polygon, :notice => 'Polygon was successfully updated.')
+    else
+      render :action => "edit"
     end
   end
 
   # DELETE /polygons/1
-  # DELETE /polygons/1.xml
   def destroy
     @polygon = Polygon.find(params[:id])
     @polygon.destroy
 
-    respond_to do |format|
-      format.html { redirect_to(polygons_url) }
-      format.xml  { head :ok }
-    end
+    redirect_to(polygons_url)
   end
 end
