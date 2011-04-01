@@ -3,12 +3,46 @@ $(document).ready(function() {
 });
 
 function loadMap() {
-  var map_data = $('#search_map_data').text().replace('\\', '');
-  var map_data_JSON = {};
-  if (map_data != "") {
-    map_data_JSON = jQuery.parseJSON(map_data);
+  var mapOptions = {
+    zoom: 5,
+    disableDefaultUI: true,
+    scrollwheel:true,
+    mapTypeId: google.maps.MapTypeId.TERRAIN
+  };
+  map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
+
+
+  loadOverlays();
+
+  var map_data_str = $('#map_data').text();
+  var bounds = new google.maps.LatLngBounds();
+  var map_data = {};
+  if (map_data_str != "") {
+    map_data = jQuery.parseJSON(map_data_str);
+    var geojson = jQuery.parseJSON(map_data.geojson);
+    var polygonSet = geojson.coordinates[0];
+    for (var i = 0; i < polygonSet.length; i++) {
+      var polygon = polygonSet[i];
+      for (var j = 0; j < polygon.length - 1; j++) {
+        var point = polygon[j];
+        var latLong = new google.maps.LatLng(point[1], point[0]);
+        addPointUsingLatLong(latLong);
+        bounds.extend(latLong);
+      }
+    }
+    if (bounds.isEmpty()) {
+      bounds.extend(new google.maps.LatLng(map_data.y, map_data.x)); // Center point.
+    }
   }
-  initialize(map_data_JSON);
+
+  map.fitBounds(bounds);
+  if (bounds.isEmpty() && navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      map.setCenter(new google.maps.LatLng(position.coords.latitude, position.coords.longitude));
+    });
+  } else {
+    map.setCenter(bounds.getCenter());
+  }
 
   startPolygon();
 
@@ -55,7 +89,7 @@ var lastMask = 1000;
 
 //var ppeOverlay;
 /**
- * Add overlays here. Add the URL constant to "environment/*.js".
+ * Add overlays here. Tip: add the URL constant to "environment/*.js".
  */
 function loadOverlays() {
   /*ppeOverlay = new SparseTileLayerOverlay();
@@ -70,55 +104,13 @@ function loadOverlays() {
    });*/
 }
 
-/**
- * Initializes map data.
- */
-function initialize(data) {
-  var mapOptions = {
-    zoom: 5,
-    //center: new google.maps.LatLng(0, 0),
-    disableDefaultUI: true,
-    scrollwheel:true,
-    mapTypeId: google.maps.MapTypeId.TERRAIN
-  };
-  map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
-  var bounds = new google.maps.LatLngBounds();
-
-
-  loadOverlays();
-
-  $.each(data, function(i, val) {
-    var latLong = new google.maps.LatLng(val.y, val.x);
-    bounds.extend(latLong); // Center point.
-    new SearchMarker({latlng: latLong, map: map, paInformation: val});
-    var poly = createGeoJsonPolygon(val.the_geom);
-    poly.setMap(map);
-    coords = val.the_geom.coordinates[0][0];
-    for (var i = 0; i < coords.length; i++) {
-      bounds.extend(new google.maps.LatLng(coords[i][1], coords[i][0]));
-    }
-  });
-
-  map.fitBounds(bounds);
-  map.setCenter(bounds.getCenter());
-
-  if( bounds.isEmpty() && navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function(position){
-      map.setCenter(new google.maps.LatLng(position.coords.latitude, position.coords.longitude));
-    });
-  }
-}
-
-/*drawing polygon*/
 var poly;
 var markers = [];
 var path = new google.maps.MVCArray;
 
 var vertexIcon = new google.maps.MarkerImage('/images/icons/delete_vertex_noover.png',
-        new google.maps.Size(12, 12),
-  // The origin for this image
-        new google.maps.Point(0, 0),
-  // The anchor for this image
+        new google.maps.Size(12, 12), // The origin for this image
+        new google.maps.Point(0, 0), // The anchor for this image
         new google.maps.Point(6, 6)
         );
 
@@ -148,19 +140,16 @@ function addPointUsingLatLong(latLng) {
     for (var i = 0, I = markers.length; i < I && markers[i] != marker; ++i);
     markers.splice(i, 1);
     path.removeAt(i);
-  }
-
-          );
+  });
 
 
   google.maps.event.addListener(marker, 'dragend', function() {
     for (var i = 0, I = markers.length; i < I && markers[i] != marker; ++i);
     path.setAt(i, marker.getPosition());
-  }
-          );
+  });
 
-  if (markers.length > 2) //do we have a polygon?
-  {
+  //do we have a polygon?
+  if (markers.length > 2) {
     if ($('#done').hasClass('disabled')) {
       $('#done').removeClass('disabled');
     }
@@ -195,13 +184,13 @@ function submitPolygon() {
   var dataObj = {"geometry": geojson};
   $.ajax({
     type: 'POST',
-    url: "polygons",
+    url: "/polygons",
     data: dataObj,
     cache: false,
     dataType: 'json',
     success: function(result) {
       if (typeof(result.id) != "undefined") {
-        window.location = 'polygons/' + result.id;
+        window.location = '/polygons';
       } else {
         alert(result.error || "Unknown error while uploading polygon.\nIs the polygon too big?\nOr perhaps its edges intersect each-other?");
       }

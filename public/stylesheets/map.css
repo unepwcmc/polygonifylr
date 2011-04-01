@@ -1,3 +1,7 @@
+#map_data {
+    display: none;
+}
+
 a#zoomIn,
 a#zoomOut {
     position: absolute;

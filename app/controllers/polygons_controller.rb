@@ -12,7 +12,7 @@ class PolygonsController < ApplicationController
 
   # GET /polygons/1/edit
   def edit
-    @polygon = Polygon.find(params[:id])
+    @geojson_data = Polygon.geojson_data(params[:id]).to_json
     render :action => :edit, :layout => "map"
   end
 
