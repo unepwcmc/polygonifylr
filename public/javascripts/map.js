@@ -180,11 +180,12 @@ function submitPolygon() {
     }
   }
 
-  var geojson = polys2geoJson([poly]);
-  var dataObj = {"geometry": geojson};
+  var dataObj = {"geometry": polys2geoJson([poly])};
+  var type = submission_target["http_verb"] || "PUT";
+  var url = submission_target["url"];
   $.ajax({
-    type: 'POST',
-    url: "/polygons",
+    type: type,
+    url: url,
     data: dataObj,
     cache: false,
     dataType: 'json',

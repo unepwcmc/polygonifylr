@@ -19,6 +19,10 @@
       ) %>
   <script type="text/javascript">
       MAX_POLYGON_AREA_KM2 = <%= Polygon::MAX_AREA_KM2 %>;
+      var submission_target = {
+          url: '<%= @submission_url %>',
+          <%= "http_verb: '#{@submission_http_verb}'," if @submission_http_verb %>
+      };
   </script>
 </head>
 <body>
